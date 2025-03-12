@@ -3,6 +3,7 @@ package dev.chetna.productcatalogservice.controllers;
 import dev.chetna.productcatalogservice.dtos.ProductDto;
 import dev.chetna.productcatalogservice.exceptions.NotFoundException;
 import dev.chetna.productcatalogservice.models.Product;
+import dev.chetna.productcatalogservice.repositories.ProductRepository;
 import dev.chetna.productcatalogservice.services.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,10 @@ import java.util.Optional;
 @RequestMapping("/products")
 public class ProductController {
     ProductService productService;
-
-    public ProductController(ProductService productService) {
+    ProductRepository productRepository;
+    public ProductController(ProductService productService, ProductRepository productRepository) {
         this.productService = productService;
+        this.productRepository = productRepository;
     }
 
     private Product convertProductDtoToProduct(ProductDto productDto){
@@ -53,6 +55,9 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<Product> addProduct(@RequestBody ProductDto productDto){
+        Product product1 = convertProductDtoToProduct(productDto);
+        productRepository.save(product1);
+
         Product product = convertProductDtoToProduct(productDto);
          Product responseProduct = productService.addProduct(product);
          MultiValueMap<String, String>headers = new LinkedMultiValueMap<>();
