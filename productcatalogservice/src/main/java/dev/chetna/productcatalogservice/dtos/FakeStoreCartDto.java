@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,5 +15,7 @@ import lombok.Setter;
 public class FakeStoreCartDto {
     private int id;
     private int userId;
-    private Product[] productsArray;
+    private Date date;
+    private int __v;
+    private FakeStoreProductDto[] products;
 }

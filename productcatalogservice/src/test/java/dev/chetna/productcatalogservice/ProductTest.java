@@ -16,6 +16,8 @@ public class ProductTest {
         product.setPrice(100);
         product.setUrl("hello");
         product.setCategory("phones");
+        product.setDescription("iphone 15 description");
+        product.setTitle("iphone 15");
         productRepository.save(product);
     }
 }
