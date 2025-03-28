@@ -2,6 +2,8 @@ package dev.chetna.productcatalogservice.services;
 
 import dev.chetna.productcatalogservice.dtos.ProductDto;
 import dev.chetna.productcatalogservice.models.Product;
+import dev.chetna.productcatalogservice.repositories.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +17,20 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 @Service
-public class ProductServiceImpl implements ProductService{
+public class FakeStoreProductServiceImpl implements ProductService{
 
+    private ProductRepository productRepository;
     RestTemplateBuilder restTemplateBuilder;
 
-    public ProductServiceImpl(RestTemplateBuilder restTemplateBuilder) {
+    public FakeStoreProductServiceImpl(RestTemplateBuilder restTemplateBuilder, ProductRepository productRepository) {
         this.restTemplateBuilder = restTemplateBuilder;
+        this.productRepository = productRepository;
+    }
+
+    @Override
+    public Product save (Product product){
+        Product productSaved =  productRepository.save(product);
+        return productSaved;
     }
 
     private Product convertProductDtotoProduct(ProductDto productDto){

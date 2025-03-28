@@ -1,7 +1,9 @@
 package dev.chetna.productcatalogservice.services;
 
 import dev.chetna.productcatalogservice.dtos.CartDto;
+import dev.chetna.productcatalogservice.dtos.FakeStoreCartDto;
 import dev.chetna.productcatalogservice.models.Cart;
+import dev.chetna.productcatalogservice.models.Product;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +18,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class CartServiceImpl implements CartService {
+public class FakeStoreCartServiceImpl implements CartService {
 
     RestTemplateBuilder restTemplateBuilder;
 
-    public CartServiceImpl(RestTemplateBuilder restTemplateBuilder) {
+    public FakeStoreCartServiceImpl(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplateBuilder = restTemplateBuilder;
+    }
+
+    private List<Product> convertProductArrayToProductList(Product[] productArray){
+        List<Product> listOfProducts = new ArrayList<>();
+        for(Product product : productArray){
+            listOfProducts.add(product);
+        }
+        return listOfProducts;
+    }
+
+    //convertFakeStoreCartDto to Cart
+    private Cart convertFakeStoreCartDtoToCart(FakeStoreCartDto fakeStoreCartDto){
+        Cart cart = new Cart();
+        cart.setUserId(fakeStoreCartDto.getUserId());
+        cart.setProductList(convertProductArrayToProductList(fakeStoreCartDto.getProductsArray()));
+        return cart;
+    }
+
+    private Product[] convertProductListToArray(List<Product> productList){
+        int noOfProducts = productList.size();
+        Product[] productArray = new Product[noOfProducts];
+        for(int i = 0; i < noOfProducts; i++){
+            productArray[i] =  productList.get(i);
+        }
+        return productArray;
     }
 
     //generic utility for REST API calls in which we configured execute()
@@ -37,6 +64,16 @@ public class CartServiceImpl implements CartService {
         return null;
     }
 
+    private CartDto convertCartToCartDto(Cart cart){
+        CartDto cartDto = new CartDto();
+        cartDto.setCartId(cart.getId());
+        cartDto.setUserId(cart.getUserId());
+
+        cartDto.setProducts(convertProductListToArray(cart.getProductList()));
+        return cartDto;
+    }
+
+    @Override
     public List<Cart> getAllCarts(){
         RestTemplate restTemplate = restTemplateBuilder.build();
         ResponseEntity<CartDto[]>response = restTemplate.getForEntity("https://fakestoreapi.com/carts", CartDto[].class);
@@ -49,6 +86,19 @@ public class CartServiceImpl implements CartService {
             listOfCarts.add(cart);
         }
         return listOfCarts;
-
     }
+
+    @Override
+    public Cart addCart(Cart cart){
+        //convert cart object to cartdto, hit the fakestoreapi using resttemplate, get responseentity from it, extract fakestorecartdto from it,
+//        convert it to cart and return
+
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        CartDto cartDto = convertCartToCartDto(cart);
+        ResponseEntity<FakeStoreCartDto> response = restTemplate.postForEntity("https://fakestoreapi.com/carts", cartDto,  FakeStoreCartDto.class);
+        FakeStoreCartDto responseCartDto = response.getBody();
+        Cart responseCart = convertFakeStoreCartDtoToCart(responseCartDto);
+        return responseCart;
+    }
+
 }

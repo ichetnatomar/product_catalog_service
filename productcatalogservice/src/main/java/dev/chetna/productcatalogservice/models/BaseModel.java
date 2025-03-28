@@ -1,8 +1,6 @@
 package dev.chetna.productcatalogservice.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +14,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 @MappedSuperclass
 public class BaseModel {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private int createdAt;
     private int lastUpdatedAt;

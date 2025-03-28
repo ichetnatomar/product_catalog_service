@@ -6,7 +6,7 @@ import dev.chetna.productcatalogservice.models.Product;
 
 public interface ProductService {
     public List<Product> getAllProducts();
-
+    public Product save(Product product);
     public Optional<Product> getProductById(int productId);
 
     public Product addProduct(Product product);

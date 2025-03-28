@@ -55,13 +55,11 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<Product> addProduct(@RequestBody ProductDto productDto){
-        Product product1 = convertProductDtoToProduct(productDto);
-        productRepository.save(product1);
 
         Product product = convertProductDtoToProduct(productDto);
-         Product responseProduct = productService.addProduct(product);
-         MultiValueMap<String, String>headers = new LinkedMultiValueMap<>();
-         headers.add("product added", "yes");
+        Product responseProduct = productService.addProduct(product);
+        MultiValueMap<String, String>headers = new LinkedMultiValueMap<>();
+        headers.add("product added", "yes");
         ResponseEntity<Product> responseEntity = new ResponseEntity<>(responseProduct, headers, HttpStatus.ACCEPTED);
         return responseEntity;
     }
