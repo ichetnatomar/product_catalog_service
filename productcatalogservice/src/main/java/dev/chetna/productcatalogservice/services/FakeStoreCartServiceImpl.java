@@ -16,10 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResponseExtractor;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,16 +125,17 @@ public class FakeStoreCartServiceImpl implements CartService {
     @Override
     public List<Cart> getAllCarts(){
         RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<CartDto[]>response = restTemplate.getForEntity("https://fakestoreapi.com/carts", CartDto[].class);
-        //response body has cartDto[] or cartDtos
-        //iterate over array, convert each cartDto to cart, add in list,and send list
+        ResponseEntity<FakeStoreCartDto[]>response = restTemplate.getForEntity("https://fakestoreapi.com/carts", FakeStoreCartDto[].class);
+        //extract fakestorecartdto from array one by one, get respective cart details from service getCartById()
+//        and product details from product dto, make cart array and send
+        List<Cart> carts = new ArrayList<>();
 
-        List<Cart> listOfCarts  = new ArrayList<>();
-        for(CartDto cartDto : response.getBody()){
-            Cart cart = convertCartDtoToCart(cartDto);
-            listOfCarts.add(cart);
+        for(FakeStoreCartDto fakeStoreCartDto : response.getBody()){
+            int fakesStoreCartDto_id = fakeStoreCartDto.getId();
+             Cart cart = getCartById(fakesStoreCartDto_id);
+             carts.add(cart);
         }
-        return listOfCarts;
+        return carts;
     }
 
     @Override
@@ -191,5 +193,48 @@ public class FakeStoreCartServiceImpl implements CartService {
 
         return responseCart;
     }
+
+    @Override
+    public Cart replaceCart(int id, Cart cart) {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        ResponseEntity<String> response =  restTemplate.postForEntity("https://fakestoreapi.com/carts/{id}", cart, String.class, id);
+        String responseCartString = response.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        FakeStoreCartDto responseCartDto;
+        try{
+            responseCartDto = objectMapper.readValue(responseCartString, FakeStoreCartDto.class);
+        }catch(JsonProcessingException e){
+            throw new RuntimeException("Error parsing FakeStoreCartDto response", e);
+        }
+
+        Cart responseCart = convertFakeStoreCartDtoToCart(responseCartDto);
+        return responseCart;
+
+    }
+
+    @Override
+    public Cart updateCart(int id, Cart cart) {
+
+        ResponseEntity<String> responseFakeStoreCartDto =  requestForEntity("https://fakestoreapi.com/carts/{id}", HttpMethod.PATCH, cart, String.class, id);
+        //convert tgis string of fakestorecartdto to cart and return
+        ObjectMapper objectMapper = new ObjectMapper();
+        FakeStoreCartDto fakeStoreCartDto;
+        try{
+            fakeStoreCartDto =  objectMapper.readValue(responseFakeStoreCartDto.getBody(), FakeStoreCartDto.class);
+
+        }catch(JsonProcessingException e){
+            throw new RuntimeException("Error parsing FakeStoreCartDto response", e);
+        }
+        Cart resposneCart = convertFakeStoreCartDtoToCart(fakeStoreCartDto);
+        return resposneCart;
+    }
+
+    @Override
+    public String deleteCart(int id) {
+       ResponseEntity<String> resposneString = requestForEntity("http://fakestoreapi.com/carts/{id}", HttpMethod.DELETE, null, String.class, id);
+       return resposneString.getBody();
+    }
+
+
 
 }

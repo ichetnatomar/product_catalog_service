@@ -68,9 +68,13 @@ public class CartController {
 
 
     @GetMapping
-    public List<Cart> getAllCarts(){
-        return cartService.getAllCarts();
+    public ResponseEntity<List<Cart>> getAllCarts(){
+        List<Cart> cartList =  cartService.getAllCarts();
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("got list of cart", "Yes");
 
+        ResponseEntity<List<Cart>> response = new ResponseEntity<>(cartList, headers, HttpStatus.OK);
+        return response;
     }
 
     @GetMapping("/{id}")
@@ -98,4 +102,31 @@ public class CartController {
         ResponseEntity<Cart> responseEntity = new ResponseEntity<>(responseCart, headers, HttpStatus.OK);
         return responseEntity;
     }
+
+    @PatchMapping("{id}")
+    public ResponseEntity<Cart> updateCart(@PathVariable("id") int id, @RequestBody CartDto cartDto){
+        //convert the cartdto to cart, send to service class, get a cart resposne, amke a reposne entity and return
+        Cart cart = convertCartDtoToCart(cartDto);
+        Cart responseCart = cartService.updateCart(id, cart);
+
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cart updated", "yes");
+
+        ResponseEntity<Cart> responseEntity = new ResponseEntity<>(responseCart, headers, HttpStatus.OK);
+        return responseEntity;
+    }
+
+    @DeleteMapping
+    public ResponseEntity<String> deleteCart(@PathVariable("id") int id){
+
+        String response = cartService.deleteCart(id);
+
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Cart deleted", "yes");
+
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(response, headers, HttpStatus.OK);
+        return responseEntity;
+    }
+
+
 }
